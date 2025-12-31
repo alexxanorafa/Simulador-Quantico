@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simulador Interativo de Modelagem Quântica - Adapte a teoria ao seu contexto">
+    <title>Simulador Quântico | Adaptação Personalizada</title>
+    
+    <!-- Fontes e Bibliotecas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --accent: #bc13fe;
+            --success: #00ff9d;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --bg-dark: #050508;
+            --glass-panel: rgba(15, 15, 25, 0.95);
+            --glass-border: rgba(40, 58, 42, 0.2);
+            --text-main: #c9d1a6;
+            --text-muted: #b0b895;
+            --grid-size: 12px;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            scroll-behavior: smooth; 
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(5, 5, 8, 0.9), rgba(5, 5, 8, 0.9)),
+                radial-gradient(circle at 20% 30%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(188, 19, 254, 0.05) 0%, transparent 50%);
+        }
+
+        /* ==================== */
+        /* CONTAINER PRINCIPAL */
+        /* ==================== */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            position: relative;
+        }
+
+        /* ==================== */
+        /* PAINEL DE CONTROLE */
+        /* ==================== */
+        .control-panel {
+            position: sticky;
+            top: 30px;
+            height: calc(100vh - 60px);
+            padding: 25px;
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .control-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .control-header h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        .control-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Seções do Painel */
+        .control-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title i {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .value-display {
+            color: var(--primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            background: rgba(0, 242, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 30px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 2px solid var(--bg-dark);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 2px solid var(--bg-dark);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+
+        /* Botões */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #00b8c4 100%);
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(188, 19, 254, 0.2);
+            color: var(--accent);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(188, 19, 254, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 51, 102, 0.3);
+        }
+
+        /* Matrix Grid */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .matrix-cell {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .matrix-cell:hover {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        .matrix-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .matrix-value {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        /* ==================== */
+        /* ÁREA DE VISUALIZAÇÃO */
+        /* ==================== */
+        .visualization-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Painel de Resultados */
+        .results-panel {
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .results-header h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .result-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Gráfico */
+        .chart-container {
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            height: 400px;
+        }
+
+        /* Variáveis Dinâmicas */
+        .variables-container {
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+        }
+
+        .variables-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .variables-header h3 {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        .variables-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .variable-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .variable-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .variable-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .variable-name {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .variable-type {
+            background: rgba(188, 19, 254, 0.2);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .variable-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-family: 'Fira Code', monospace;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        /* ==================== */
+        /* BARRA DE SCROLL CUSTOMIZADA */
+        /* ==================== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 15, 25, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+                135deg,
+                rgba(0, 242, 255, 0.7) 0%,
+                rgba(188, 19, 254, 0.7) 100%
+            );
+            border-radius: 10px;
+            border: 2px solid rgba(15, 15, 25, 0.8);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(
+                135deg,
+                rgba(0, 242, 255, 0.9) 0%,
+                rgba(188, 19, 254, 0.9) 100%
+            );
+        }
+
+        /* ==================== */
+        /* RESPONSIVIDADE */
+        /* ==================== */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                position: static;
+                height: auto;
+                margin-bottom: 30px;
+            }
+            
+            .variables-list {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px 15px;
+            }
+            
+            .control-panel,
+            .results-panel,
+            .chart-container,
+            .variables-container {
+                padding: 20px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-value {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Animações */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- PAINEL DE CONTROLE -->
+        <aside class="control-panel">
+            
+            <div class="control-header">
+                <h1>Simulador Quântico</h1>
+                <p>Expert Mode - Defina suas variáveis</p>
+            </div>
+
+            <!-- ESTADO BASE -->
+            <div class="control-section">
+                <div class="section-title">
+                    <i>α</i>
+                    <span>Estado Base (|C⟩)</span>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Eficiência Base</span>
+                        <span class="value-display" id="baseEfficiencyValue">10.0%</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="baseEfficiency" min="1" max="20" step="0.1" value="10" class="slider">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Peso no Sistema</span>
+                        <span class="value-display" id="baseWeightValue">0.95</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="baseWeight" min="0.5" max="1" step="0.01" value="0.95" class="slider">
+                    </div>
+                </div>
+            </div>
+
+            <!-- VARIÁVEIS PERSONALIZADAS -->
+            <div class="control-section">
+                <div class="section-title">
+                    <i>β</i>
+                    <span>Estados Personalizados</span>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Número de Estados</span>
+                        <span class="value-display" id="stateCountValue">3</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="stateCount" min="1" max="10" step="1" value="3" class="slider">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Coerência do Sistema</span>
+                        <span class="value-display" id="coherenceValue">0.75</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="coherence" min="0" max="1" step="0.01" value="0.75" class="slider">
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" id="addVariableBtn">
+                    <span>+</span>
+                    <span>Adicionar Variável Específica</span>
+                </button>
+            </div>
+
+            <!-- MATRIZ DE INTERAÇÃO -->
+            <div class="control-section">
+                <div class="section-title">
+                    <i>Σ</i>
+                    <span>Matriz de Interação</span>
+                </div>
+                
+                <div class="matrix-grid" id="interactionMatrix">
+                    <!-- Gerado dinamicamente -->
+                </div>
+
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Força de Acoplamento</span>
+                        <span class="value-display" id="couplingStrengthValue">0.05</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="couplingStrength" min="0" max="0.2" step="0.001" value="0.05" class="slider">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTROLES AVANÇADOS -->
+            <div class="control-section">
+                <div class="section-title">
+                    <i>∇</i>
+                    <span>Controles Avançados</span>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Ruído Quântico (η)</span>
+                        <span class="value-display" id="noiseValue">0.15</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="noise" min="0" max="0.5" step="0.01" value="0.15" class="slider">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Tempo de Decoerência</span>
+                        <span class="value-display" id="decoherenceTimeValue">0.5s</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="decoherenceTime" min="0.1" max="2" step="0.1" value="0.5" class="slider">
+                    </div>
+                </div>
+
+                <button class="btn btn-danger" id="resetBtn">
+                    <span>↻</span>
+                    <span>Resetar Sistema</span>
+                </button>
+            </div>
+
+            <!-- EQUAÇÃO ATUAL -->
+            <div class="control-section">
+                <div class="section-title">
+                    <i>Ψ</i>
+                    <span>Estado Atual</span>
+                </div>
+                <div class="equation-display" id="currentEquation">
+                    \[ |\psi\rangle = \alpha|C\rangle + \sum_{i=1}^{3}\beta_i|A_i\rangle \]
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ÁREA DE VISUALIZAÇÃO -->
+        <main class="visualization-area">
+            
+            <!-- PAINEL DE RESULTADOS -->
+            <section class="results-panel">
+                <div class="results-header">
+                    <h2>Potencial Realizado</h2>
+                    <div class="value-display" style="font-size: 1.2rem;">
+                        <span id="livePotential">19.18%</span>
+                        <span style="color: var(--text-muted);"> do máximo teórico</span>
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-value" id="incoherentResult">10.09%</div>
+                        <div class="result-label">Adição Linear</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="coherentResult">19.18%</div>
+                        <div class="result-label">Superposição Coerente</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="synergyGain">+89.9%</div>
+                        <div class="result-label">Ganho por Sinergia</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="quantumEfficiency">74.2%</div>
+                        <div class="result-label">Eficiência Quântica</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Limite Teórico Máximo</span>
+                        <span class="value-display" id="maxTheoreticalValue">25.7%</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="maxTheoretical" min="10" max="50" step="0.1" value="25.7" class="slider">
+                    </div>
+                </div>
+            </section>
+
+            <!-- GRÁFICO DINÂMICO -->
+            <section class="chart-container">
+                <canvas id="quantumChart"></canvas>
+            </section>
+
+            <!-- VARIÁVEIS PERSONALIZADAS -->
+            <section class="variables-container">
+                <div class="variables-header">
+                    <h3>Suas Variáveis Personalizadas</h3>
+                    <button class="btn btn-primary" id="exportBtn">
+                        <span>📥</span>
+                        <span>Exportar Configuração</span>
+                    </button>
+                </div>
+                
+                <div class="variables-list" id="variablesList">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </section>
+
+            <!-- INFORMAÇÕES ADICIONAIS -->
+            <section class="results-panel">
+                <h3 style="margin-bottom: 20px; color: var(--primary);">Interpretação dos Resultados</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 10px;">Estado Atual do Sistema</h4>
+                        <p style="font-size: 0.9rem; line-height: 1.6;">
+                            <span id="systemStateDesc">Sistema com coerência média (η=0.75) apresentando interferência construtiva significativa.</span>
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 10px;">Otimizações Sugeridas</h4>
+                        <p style="font-size: 0.9rem; line-height: 1.6;">
+                            <span id="optimizationSuggestions">Aumentar acoplamento entre estados A₂ e A₃ para melhorar sinergia.</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        // ==================== INICIALIZAÇÃO ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar variáveis do sistema
+            const quantumSystem = {
+                baseState: {
+                    efficiency: 0.10,
+                    weight: 0.95,
+                    label: "|C⟩"
+                },
+                customStates: [],
+                coherence: 0.75,
+                couplingStrength: 0.05,
+                noise: 0.15,
+                decoherenceTime: 0.5,
+                maxTheoretical: 0.257,
+                stateCount: 3
+            };
+
+            // Inicializar estados personalizados
+            function initializeCustomStates() {
+                quantumSystem.customStates = [];
+                for (let i = 0; i < quantumSystem.stateCount; i++) {
+                    quantumSystem.customStates.push({
+                        id: `A${i+1}`,
+                        label: `|A${i+1}⟩`,
+                        efficiency: 0.11 + (i * 0.005),
+                        weight: 0.1,
+                        coupling: 0.02 + (i * 0.005),
+                        type: ['Técnica', 'Coragem', 'Decisão', 'Adaptação', 'Risco'][i] || 'Personalizado'
+                    });
+                }
+            }
+
+            // Inicializar Chart.js
+            let quantumChart = null;
+            function initializeChart() {
+                const ctx = document.getElementById('quantumChart').getContext('2d');
+                
+                if (quantumChart) {
+                    quantumChart.destroy();
+                }
+                
+                quantumChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Coerência', 'Sinergia', 'Eficiência', 'Estabilidade', 'Adaptabilidade', 'Potencial'],
+                        datasets: [{
+                            label: 'Sistema Atual',
+                            data: [0.75, 0.82, 0.68, 0.59, 0.73, 0.88],
+                            backgroundColor: 'rgba(0, 242, 255, 0.2)',
+                            borderColor: 'rgba(0, 242, 255, 1)',
+                            pointBackgroundColor: 'rgba(0, 242, 255, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(0, 242, 255, 1)',
+                            borderWidth: 2
+                        }, {
+                            label: 'Estado Ótimo',
+                            data: [0.95, 0.90, 0.85, 0.80, 0.88, 0.95],
+                            backgroundColor: 'rgba(188, 19, 254, 0.1)',
+                            borderColor: 'rgba(188, 19, 254, 0.5)',
+                            pointBackgroundColor: 'rgba(188, 19, 254, 0.5)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(188, 19, 254, 0.5)',
+                            borderWidth: 1,
+                            borderDash: [5, 5]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                pointLabels: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                ticks: {
+                                    backdropColor: 'transparent',
+                                    color: 'rgba(255, 255, 255, 0.5)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ==================== CÁLCULOS QUÂNTICOS ====================
+            function calculateIncoherentPotential() {
+                let total = quantumSystem.baseState.efficiency * quantumSystem.baseState.weight;
+                let weightSum = quantumSystem.baseState.weight;
+                
+                quantumSystem.customStates.forEach(state => {
+                    total += state.efficiency * state.weight;
+                    weightSum += state.weight;
+                });
+                
+                return (total / weightSum) * 100;
+            }
+
+            function calculateCoherentPotential() {
+                // Termo base
+                let baseTerm = quantumSystem.baseState.efficiency * Math.pow(quantumSystem.baseState.weight, 2);
+                
+                // Termos dos estados personalizados
+                let customTerms = 0;
+                let crossTerms = 0;
+                
+                quantumSystem.customStates.forEach(state => {
+                    customTerms += state.efficiency * Math.pow(state.weight, 2);
+                    crossTerms += 2 * state.weight * quantumSystem.couplingStrength * quantumSystem.coherence;
+                });
+                
+                // Normalização
+                const N = Math.pow(quantumSystem.baseState.weight, 2) + 
+                         quantumSystem.customStates.reduce((sum, state) => sum + Math.pow(state.weight, 2), 0);
+                
+                // Aplicar coerência e ruído
+                let coherentResult = (baseTerm + customTerms + crossTerms) / N;
+                coherentResult *= quantumSystem.coherence;
+                coherentResult *= (1 - quantumSystem.noise);
+                
+                return Math.min(coherentResult * 100, quantumSystem.maxTheoretical * 100);
+            }
+
+            function calculateSynergyGain() {
+                const incoherent = calculateIncoherentPotential();
+                const coherent = calculateCoherentPotential();
+                return ((coherent - incoherent) / incoherent) * 100;
+            }
+
+            function calculateQuantumEfficiency() {
+                const current = calculateCoherentPotential();
+                return (current / (quantumSystem.maxTheoretical * 100)) * 100;
+            }
+
+            // ==================== ATUALIZAÇÃO DA INTERFACE ====================
+            function updateAllValues() {
+                // Atualizar valores calculados
+                const incoherent = calculateIncoherentPotential();
+                const coherent = calculateCoherentPotential();
+                const synergy = calculateSynergyGain();
+                const efficiency = calculateQuantumEfficiency();
+                
+                // Atualizar displays
+                document.getElementById('incoherentResult').textContent = `${incoherent.toFixed(2)}%`;
+                document.getElementById('coherentResult').textContent = `${coherent.toFixed(2)}%`;
+                document.getElementById('synergyGain').textContent = `+${synergy.toFixed(1)}%`;
+                document.getElementById('quantumEfficiency').textContent = `${efficiency.toFixed(1)}%`;
+                document.getElementById('livePotential').textContent = `${coherent.toFixed(2)}%`;
+                
+                // Atualizar equação
+                updateEquation();
+                
+                // Atualizar gráfico
+                updateChart();
+                
+                // Atualizar variáveis
+                updateVariablesList();
+                
+                // Atualizar interpretação
+                updateInterpretation(coherent, synergy, efficiency);
+            }
+
+            function updateEquation() {
+                let equation = `\\[ |\\psi\\rangle = ${quantumSystem.baseState.weight.toFixed(2)}|C\\rangle `;
+                
+                if (quantumSystem.customStates.length > 0) {
+                    equation += `+ \\sum_{i=1}^{${quantumSystem.customStates.length}}\\beta_i|A_i\\rangle `;
+                }
+                
+                equation += `\\]`;
+                document.getElementById('currentEquation').innerHTML = equation;
+                
+                if (window.MathJax) {
+                    MathJax.typeset();
+                }
+            }
+
+            function updateChart() {
+                if (!quantumChart) return;
+                
+                // Atualizar dados do gráfico baseado no sistema atual
+                const data = [
+                    quantumSystem.coherence, // Coerência
+                    quantumSystem.couplingStrength * 10, // Sinergia (escalada)
+                    calculateQuantumEfficiency() / 100, // Eficiência (normalizada)
+                    0.8 - (quantumSystem.noise * 0.5), // Estabilidade
+                    0.6 + (quantumSystem.coherence * 0.3), // Adaptabilidade
+                    calculateCoherentPotential() / 100 // Potencial (normalizado)
+                ];
+                
+                quantumChart.data.datasets[0].data = data;
+                quantumChart.update();
+            }
+
+            function updateVariablesList() {
+                const container = document.getElementById('variablesList');
+                container.innerHTML = '';
+                
+                quantumSystem.customStates.forEach((state, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'variable-card fade-in';
+                    card.innerHTML = `
+                        <div class="variable-header">
+                            <div class="variable-name">${state.label}</div>
+                            <div class="variable-type">${state.type}</div>
+                        </div>
+                        <div class="variable-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Eficiência</div>
+                                <div class="stat-value">${(state.efficiency * 100).toFixed(1)}%</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Peso</div>
+                                <div class="stat-value">${state.weight.toFixed(2)}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Acoplamento</div>
+                                <div class="stat-value">${state.coupling.toFixed(3)}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Contribuição</div>
+                                <div class="stat-value">${(state.efficiency * state.weight * 100).toFixed(2)}%</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <input type="range" class="state-slider" data-index="${index}" data-type="weight" 
+                                   min="0" max="0.5" step="0.01" value="${state.weight}" style="width: 70%;">
+                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" 
+                                    onclick="removeState(${index})">×</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                
+                // Adicionar event listeners aos novos sliders
+                document.querySelectorAll('.state-slider').forEach(slider => {
+                    slider.addEventListener('input', function() {
+                        const index = parseInt(this.dataset.index);
+                        const type = this.dataset.type;
+                        const value = parseFloat(this.value);
+                        
+                        if (type === 'weight') {
+                            quantumSystem.customStates[index].weight = value;
+                        }
+                        
+                        updateAllValues();
+                    });
+                });
+            }
+
+            function updateInterpretation(coherent, synergy, efficiency) {
+                let stateDesc = '';
+                let suggestions = '';
+                
+                if (quantumSystem.coherence > 0.8) {
+                    stateDesc = 'Sistema altamente coerente com interferência construtiva ótima.';
+                } else if (quantumSystem.coherence > 0.5) {
+                    stateDesc = 'Sistema com coerência média apresentando sinergias significativas.';
+                } else {
+                    stateDesc = 'Sistema com baixa coerência, limitando efeitos quânticos.';
+                }
+                
+                if (synergy > 50) {
+                    suggestions = 'Manter alto acoplamento entre estados para maximizar sinergia.';
+                } else if (synergy > 20) {
+                    suggestions = 'Aumentar acoplamento entre estados para melhorar sinergia.';
+                } else {
+                    suggestions = 'Revisar matriz de interação para melhorar sinergia entre estados.';
+                }
+                
+                if (efficiency > 80) {
+                    stateDesc += ' Eficiência quântica próxima do ótimo.';
+                }
+                
+                document.getElementById('systemStateDesc').textContent = stateDesc;
+                document.getElementById('optimizationSuggestions').textContent = suggestions;
+            }
+
+            // ==================== INTERAÇÃO COM SLIDERS ====================
+            function setupSliders() {
+                // Mapeamento de sliders para propriedades
+                const sliders = {
+                    baseEfficiency: (value) => {
+                        quantumSystem.baseState.efficiency = value / 100;
+                        document.getElementById('baseEfficiencyValue').textContent = `${value.toFixed(1)}%`;
+                    },
+                    baseWeight: (value) => {
+                        quantumSystem.baseState.weight = value;
+                        document.getElementById('baseWeightValue').textContent = value.toFixed(2);
+                    },
+                    stateCount: (value) => {
+                        quantumSystem.stateCount = value;
+                        document.getElementById('stateCountValue').textContent = value;
+                        initializeCustomStates();
+                    },
+                    coherence: (value) => {
+                        quantumSystem.coherence = value;
+                        document.getElementById('coherenceValue').textContent = value.toFixed(2);
+                    },
+                    couplingStrength: (value) => {
+                        quantumSystem.couplingStrength = value;
+                        document.getElementById('couplingStrengthValue').textContent = value.toFixed(3);
+                    },
+                    noise: (value) => {
+                        quantumSystem.noise = value;
+                        document.getElementById('noiseValue').textContent = value.toFixed(2);
+                    },
+                    decoherenceTime: (value) => {
+                        quantumSystem.decoherenceTime = value;
+                        document.getElementById('decoherenceTimeValue').textContent = `${value.toFixed(1)}s`;
+                    },
+                    maxTheoretical: (value) => {
+                        quantumSystem.maxTheoretical = value / 100;
+                        document.getElementById('maxTheoreticalValue').textContent = `${value.toFixed(1)}%`;
+                    }
+                };
+                
+                // Configurar event listeners para todos os sliders
+                Object.keys(sliders).forEach(sliderId => {
+                    const slider = document.getElementById(sliderId);
+                    if (slider) {
+                        slider.addEventListener('input', function() {
+                            const value = parseFloat(this.value);
+                            sliders[sliderId](value);
+                            updateAllValues();
+                        });
+                    }
+                });
+            }
+
+            // ==================== FUNÇÕES ADICIONAIS ====================
+            window.removeState = function(index) {
+                quantumSystem.customStates.splice(index, 1);
+                quantumSystem.stateCount = quantumSystem.customStates.length;
+                document.getElementById('stateCount').value = quantumSystem.stateCount;
+                document.getElementById('stateCountValue').textContent = quantumSystem.stateCount;
+                updateAllValues();
+            };
+
+            document.getElementById('addVariableBtn').addEventListener('click', function() {
+                if (quantumSystem.customStates.length >= 10) {
+                    alert('Máximo de 10 estados atingido.');
+                    return;
+                }
+                
+                const newIndex = quantumSystem.customStates.length + 1;
+                const types = ['Cognitivo', 'Emocional', 'Físico', 'Espiritual', 'Social', 'Criativo', 'Técnico', 'Estratégico'];
+                
+                quantumSystem.customStates.push({
+                    id: `A${newIndex}`,
+                    label: `|A${newIndex}⟩`,
+                    efficiency: 0.11 + (Math.random() * 0.05),
+                    weight: 0.1,
+                    coupling: 0.02 + (Math.random() * 0.03),
+                    type: types[Math.floor(Math.random() * types.length)]
+                });
+                
+                quantumSystem.stateCount = quantumSystem.customStates.length;
+                document.getElementById('stateCount').value = quantumSystem.stateCount;
+                document.getElementById('stateCountValue').textContent = quantumSystem.stateCount;
+                
+                updateAllValues();
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (confirm('Resetar todo o sistema para valores padrão?')) {
+                    // Resetar sliders
+                    document.getElementById('baseEfficiency').value = 10;
+                    document.getElementById('baseWeight').value = 0.95;
+                    document.getElementById('stateCount').value = 3;
+                    document.getElementById('coherence').value = 0.75;
+                    document.getElementById('couplingStrength').value = 0.05;
+                    document.getElementById('noise').value = 0.15;
+                    document.getElementById('decoherenceTime').value = 0.5;
+                    document.getElementById('maxTheoretical').value = 25.7;
+                    
+                    // Resetar sistema
+                    quantumSystem.baseState.efficiency = 0.10;
+                    quantumSystem.baseState.weight = 0.95;
+                    quantumSystem.stateCount = 3;
+                    quantumSystem.coherence = 0.75;
+                    quantumSystem.couplingStrength = 0.05;
+                    quantumSystem.noise = 0.15;
+                    quantumSystem.decoherenceTime = 0.5;
+                    quantumSystem.maxTheoretical = 0.257;
+                    
+                    initializeCustomStates();
+                    updateAllValues();
+                }
+            });
+
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                const config = {
+                    timestamp: new Date().toISOString(),
+                    system: quantumSystem,
+                    results: {
+                        incoherent: calculateIncoherentPotential(),
+                        coherent: calculateCoherentPotential(),
+                        synergy: calculateSynergyGain(),
+                        efficiency: calculateQuantumEfficiency()
+                    }
+                };
+                
+                const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `quantum-simulator-config-${new Date().getTime()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('Configuração exportada com sucesso!');
+            });
+
+            // ==================== INICIALIZAÇÃO FINAL ====================
+            initializeCustomStates();
+            initializeChart();
+            setupSliders();
+            updateAllValues();
+            
+            // Atualizar matriz de interação
+            function updateInteractionMatrix() {
+                const matrix = document.getElementById('interactionMatrix');
+                matrix.innerHTML = '';
+                
+                // Adicionar célula base
+                const baseCell = document.createElement('div');
+                baseCell.className = 'matrix-cell';
+                baseCell.innerHTML = `
+                    <div class="matrix-label">C-C</div>
+                    <div class="matrix-value">${(quantumSystem.baseState.efficiency * 100).toFixed(1)}%</div>
+                `;
+                matrix.appendChild(baseCell);
+                
+                // Adicionar células de interação
+                quantumSystem.customStates.forEach((state, i) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.innerHTML = `
+                        <div class="matrix-label">C-A${i+1}</div>
+                        <div class="matrix-value">${(state.coupling * 100).toFixed(2)}%</div>
+                    `;
+                    matrix.appendChild(cell);
+                });
+            }
+            
+            updateInteractionMatrix();
+            
+            // Atualizar matriz quando coupling mudar
+            document.getElementById('couplingStrength').addEventListener('input', function() {
+                quantumSystem.customStates.forEach(state => {
+                    state.coupling = quantumSystem.couplingStrength;
+                });
+                updateInteractionMatrix();
+            });
+        });
+    </script>
+</body>
+</html>
